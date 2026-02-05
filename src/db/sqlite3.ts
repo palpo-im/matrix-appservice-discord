@@ -32,12 +32,12 @@ export class SQLite3 implements IDatabaseConnector {
 
     public async Get(sql: string, parameters?: ISqlCommandParameters): Promise<ISqlRow|null> {
         log.silly("Get:", sql);
-        return this.db.prepare(sql).get(parameters || []);
+        return this.db.prepare(sql).get(parameters || []) as ISqlRow | null;
     }
 
     public async All(sql: string, parameters?: ISqlCommandParameters): Promise<ISqlRow[]> {
         log.silly("All:", sql);
-        return this.db.prepare(sql).all(parameters || []);
+        return this.db.prepare(sql).all(parameters || []) as ISqlRow[];
     }
 
     public async Run(sql: string, parameters?: ISqlCommandParameters): Promise<void> {

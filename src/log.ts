@@ -78,9 +78,9 @@ export class Log {
     private static setupFileTransport(config: LoggingFile): transports.FileTransportInstance {
         config = Object.assign(new LoggingFile(), config);
         const filterOutMods = format((info, _) => {
-            if (config.disabled.includes(info.module) ||
+            if (config.disabled.includes(info.module as string) ||
                 config.enabled.length > 0 &&
-                !config.enabled.includes(info.module)
+                !config.enabled.includes(info.module as string)
             ) {
                 return false;
             }

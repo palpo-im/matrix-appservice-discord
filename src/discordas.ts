@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { Appservice, IAppserviceRegistration, LogService, MatrixClient } from "matrix-bot-sdk";
+import { Appservice, IAppserviceRegistration, LogService, MatrixClient } from "@vector-im/matrix-bot-sdk";
 import * as yaml from "js-yaml";
 import * as fs from "fs";
 import { DiscordBridgeConfig } from "./config";
@@ -26,7 +26,7 @@ import * as usage from "command-line-usage";
 import { v4 as uuid } from "uuid";
 import { IMatrixEvent } from "./matrixtypes";
 import { MetricPeg, PrometheusBridgeMetrics } from "./metrics";
-import { Response } from "express";
+import { Request, Response } from "express";
 
 const log = new Log("DiscordAS");
 
@@ -69,7 +69,7 @@ function generateRegistration(opts, registrationPath: string, config: DiscordBri
         url: opts.url,
         /* eslint-enable @typescript-eslint/naming-convention */
     } as IAppserviceRegistration;
-    fs.writeFileSync(registrationPath, yaml.safeDump(reg));
+    fs.writeFileSync(registrationPath, yaml.dump(reg));
 }
 
 function setupLogging(): void {
@@ -127,11 +127,11 @@ async function run(): Promise<void> {
     const registrationPath = opts.file || "discord-registration.yaml";
 
     const config = new DiscordBridgeConfig();
-    const readConfig = yaml.safeLoad(fs.readFileSync(configPath, "utf8"));
-    if (typeof readConfig !== "object") {
+    const readConfig = yaml.load(fs.readFileSync(configPath, "utf8"));
+    if (readConfig === null || typeof readConfig !== "object") {
         throw Error("Config is not of type object");
     }
-    config.applyConfig(readConfig);
+    config.applyConfig(readConfig as { [key: string]: unknown });
     config.applyEnvironmentOverrides(process.env);
 
     if (opts["generate-registration"]) {
@@ -153,7 +153,7 @@ async function run(): Promise<void> {
                   "https://github.com/Half-Shot/matrix-appservice-discord/");
         throw Error("Bridge has legacy configuration options and is unable to start");
     }
-    const registration = yaml.safeLoad(fs.readFileSync(registrationPath, "utf8")) as IAppserviceRegistration;
+    const registration = yaml.load(fs.readFileSync(registrationPath, "utf8")) as IAppserviceRegistration;
     setupLogging();
 
     const store = new DiscordStore(config.database);
@@ -188,7 +188,8 @@ async function run(): Promise<void> {
     // remove @types/express-serve-static-core and @types/serve-static from yarn.lock
     // and run yarn.
     // See https://github.com/DefinitelyTyped/DefinitelyTyped/issues/49595
-    appservice.expressAppInstance.get("/health", (_, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (appservice.expressAppInstance as any).get("/health", (_: Request, res: Response) => {
         res.status(200).send("");
     });
 

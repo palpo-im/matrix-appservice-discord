@@ -243,12 +243,12 @@ class MatrixClientMock extends AppserviceMockBase {
         return `mxc://${filename}`;
     }
 
-    public mxcToHttp(mxcUrl: string) {
+    public async mxcToHttp(mxcUrl: string) {
         this.funcCalled("mxcToHttp", mxcUrl);
         return mxcUrl.replace("mxc://", "https://");
     }
 
-    public mxcToHttpThumbnail(mxcUrl: string) {
+    public async mxcToHttpThumbnail(mxcUrl: string) {
         this.funcCalled("mxcToHttpThumbnail", mxcUrl);
         return mxcUrl.replace("mxc://", "https://");
     }

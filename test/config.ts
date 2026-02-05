@@ -16,12 +16,12 @@ limitations under the License.
 
 import { argv } from "process";
 import { Log } from "../src/log";
-import * as WhyRunning from "why-is-node-running";
+import whyIsNodeRunning from "why-is-node-running";
 
 if (!argv.includes("--noisy")) {
     Log.ForceSilent();
 }
 
 after(() => {
-    WhyRunning();
+    whyIsNodeRunning();
 });

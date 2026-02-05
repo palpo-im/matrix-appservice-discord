@@ -18,7 +18,7 @@ import * as Discord from "@mx-puppet/better-discord.js";
 import { IMatrixMessage } from "./matrixtypes";
 import { Util } from "./util";
 import { DiscordBot } from "./bot";
-import { MatrixClient } from "matrix-bot-sdk";
+import { MatrixClient } from "@vector-im/matrix-bot-sdk";
 import { DiscordBridgeConfig } from "./config";
 import {
     IMatrixMessageParserCallbacks,
@@ -128,8 +128,11 @@ export class MatrixMessageProcessor {
                 return match[1];
             },
             mxcUrlToHttp: (mxc: string) => {
-                if (params && params.mxClient) {
-                    return params.mxClient.mxcToHttp(mxc);
+                // Convert mxc:// URL to http:// URL synchronously
+                // mxc://server.name/media-id -> https://homeserver/_matrix/media/r0/download/server.name/media-id
+                if (mxc.startsWith("mxc://") && this.config.bridge.homeserverUrl) {
+                    const [serverName, mediaId] = mxc.slice(6).split("/");
+                    return `${this.config.bridge.homeserverUrl}/_matrix/media/r0/download/${serverName}/${mediaId}`;
                 }
                 return mxc;
             },

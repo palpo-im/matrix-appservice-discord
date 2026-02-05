@@ -6,7 +6,9 @@ interface ITimedValue<V> {
     ts: number;
 }
 
-export class TimedCache<K, V> implements Map<K, V> {
+// Implementing a subset of Map interface without strict iterator types
+// to avoid TypeScript 5.x MapIterator compatibility issues
+export class TimedCache<K, V> {
     private readonly  map: Map<K, ITimedValue<V>>;
 
     public constructor(private readonly liveFor: number) {
@@ -21,7 +23,7 @@ export class TimedCache<K, V> implements Map<K, V> {
         return this.map.delete(key);
     }
 
-    public forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void|Promise<void>): void {
+    public forEach(callbackfn: (value: V, key: K, map: TimedCache<K, V>) => void|Promise<void>): void {
         for (const item of this) {
             const potentialPromise = callbackfn(item[1], item[0], this);
             if (potentialPromise) {

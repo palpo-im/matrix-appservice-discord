@@ -1,5 +1,5 @@
 import { DiscordBridgeConfig } from "../src/config";
-import { Appservice, IAppserviceRegistration } from "matrix-bot-sdk";
+import { Appservice, IAppserviceRegistration } from "@vector-im/matrix-bot-sdk";
 import { DiscordStore } from "../src/store";
 import * as yaml from "js-yaml";
 import * as fs from "fs";
@@ -11,9 +11,9 @@ export class ToolsHelper {
         appservice: Appservice,
         config: DiscordBridgeConfig,
     } {
-        const registration = yaml.safeLoad(fs.readFileSync(regFile, "utf8"));
+        const registration = yaml.load(fs.readFileSync(regFile, "utf8"));
         const config: DiscordBridgeConfig = Object.assign(
-            new DiscordBridgeConfig(), yaml.safeLoad(fs.readFileSync(configFile, "utf8")));
+            new DiscordBridgeConfig(), yaml.load(fs.readFileSync(configFile, "utf8")));
         config.applyEnvironmentOverrides(process.env);
         if (registration === null || typeof registration !== "object") {
             throw Error("Failed to parse registration file");

@@ -19,7 +19,7 @@ import { DiscordBot } from "./bot";
 import { DiscordBridgeConfig } from "./config";
 import { Util, wrapError } from "./util";
 import * as path from "path";
-import * as mime from "mime";
+import mime from "mime";
 import { IMatrixEvent, IMatrixEventContent, IMatrixMessage } from "./matrixtypes";
 import { MatrixMessageProcessor, IMatrixMessageProcessorParams } from "./matrixmessageprocessor";
 import { MatrixCommandHandler } from "./matrixcommandhandler";
@@ -27,7 +27,7 @@ import { DbEvent } from "./db/dbdataevent";
 
 import { Log } from "./log";
 import { IRoomStoreEntry, RemoteStoreRoom } from "./db/roomstore";
-import { Appservice, MatrixClient } from "matrix-bot-sdk";
+import { Appservice, MatrixClient } from "@vector-im/matrix-bot-sdk";
 import { DiscordStore } from "./store";
 import { TimedCache } from "./structures/timedcache";
 
@@ -109,10 +109,11 @@ export class MatrixEventProcessor {
                 let prevMembership = "";
                 if (event.content!.membership === "leave" && event.replaces_state) {
                     const intent = this.bridge.botIntent;
-                    prevMembership = (await intent.underlyingClient.getEvent(
+                    const prevEvent = await intent.underlyingClient.getEvent(
                         event.room_id,
                         event.replaces_state,
-                    )).content.membership;
+                    );
+                    prevMembership = (prevEvent.content as { membership?: string })?.membership || "";
                 }
                 await this.discord.HandleMatrixKickBan(
                     event.room_id,
@@ -350,7 +351,7 @@ export class MatrixEventProcessor {
 
         let size = event.content.info.size || 0;
         const name = this.GetFilenameForMediaEvent(event.content);
-        const url = this.bridge.botClient.mxcToHttp(event.content.url);
+        const url = await this.bridge.botClient.mxcToHttp(event.content.url);
         if (size < MaxFileSize) {
             const attachment = (await Util.DownloadFile(url)).buffer;
             size = attachment.byteLength;
@@ -387,7 +388,7 @@ export class MatrixEventProcessor {
         const intent = this.bridge.botIntent;
         // Try to get the event.
         try {
-            const sourceEvent = (await intent.underlyingClient.getEvent(event.room_id, eventId)) as IMatrixEvent;
+            const sourceEvent = (await intent.underlyingClient.getEvent(event.room_id, eventId)) as unknown as IMatrixEvent;
             if (!sourceEvent || !sourceEvent.content || !sourceEvent.content.body) {
                 throw Error("No content could be found");
             }
@@ -402,7 +403,7 @@ export class MatrixEventProcessor {
             replyEmbed.setTimestamp(new Date(sourceEvent.origin_server_ts!));
 
             if (this.HasAttachment(sourceEvent)) {
-                const url = this.bridge.botClient.mxcToHttp(sourceEvent.content!.url!);
+                const url = await this.bridge.botClient.mxcToHttp(sourceEvent.content!.url!);
                 if (["m.image", "m.sticker"].includes(sourceEvent.content!.msgtype as string)
                     || sourceEvent.type === "m.sticker") {
                     // we have an image reply
@@ -522,7 +523,7 @@ export class MatrixEventProcessor {
             }
 
             if (profile.avatar_url) {
-                avatarUrl = this.bridge.botClient.mxcToHttpThumbnail(
+                avatarUrl = await this.bridge.botClient.mxcToHttpThumbnail(
                     profile.avatar_url,
                     DISCORD_AVATAR_WIDTH,
                     DISCORD_AVATAR_HEIGHT,
