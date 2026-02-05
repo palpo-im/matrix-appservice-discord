@@ -105,8 +105,7 @@ export class DiscordStore implements IAppserviceStorageProvider {
         while (version < targetSchema) {
             version++;
             const schemaClass = require(`./db/schema/v${version}`).Schema;
-            let schema: IDbSchema;
-            schema = (new schemaClass() as IDbSchema);
+            const schema: IDbSchema = (new schemaClass() as IDbSchema);
             log.info(`Updating database to v${version}, "${schema.description}"`);
             try {
                 await schema.run(this);
@@ -250,7 +249,7 @@ export class DiscordStore implements IAppserviceStorageProvider {
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any callable-types
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public async Get<T extends IDbData>(dbType: {new(): T; }, params: any): Promise<T|null> {
         const dType = new dbType();
         log.silly(`get <${dType.constructor.name} with params ${params}>`);

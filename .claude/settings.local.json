@@ -10,7 +10,8 @@
       "Bash(yarn build:*)",
       "Bash(cat:*)",
       "Bash(yarn test)",
-      "Bash(git remote set-url:*)"
+      "Bash(git remote set-url:*)",
+      "Bash(yarn lint:*)"
     ]
   }
 }
