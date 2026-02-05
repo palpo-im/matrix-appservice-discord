@@ -2,13 +2,13 @@ name: Newsfile
 
 on:
   push:
-    branches: ["develop", "release-*"]
+    branches: ["main", "release-*"]
   pull_request:
   workflow_dispatch:
 
 jobs:
   changelog:
-    if: ${{ github.base_ref == 'develop'  || contains(github.base_ref, 'release-') }}
+    if: ${{ github.base_ref == 'main'  || contains(github.base_ref, 'release-') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
