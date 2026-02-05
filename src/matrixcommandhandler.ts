@@ -21,9 +21,9 @@ import { DiscordBridgeConfig } from "./config";
 import { IMatrixEvent } from "./matrixtypes";
 import { Provisioner } from "./provisioner";
 import { Util, ICommandActions, ICommandParameters, CommandPermissonCheck } from "./util";
-import { Appservice } from "matrix-bot-sdk";
+import { Appservice } from "@vector-im/matrix-bot-sdk";
 import { IRoomStoreEntry } from "./db/roomstore";
-import * as markdown from "marked";
+import { marked } from "marked";
 const log = new Log("MatrixCommandHandler");
 
 const PROVISIONING_DEFAULT_POWER_LEVEL = 50;
@@ -188,7 +188,7 @@ export class MatrixCommandHandler {
         };
 
         const reply = await Util.ParseCommand("!discord", event.content!.body!, actions, parameters, permissionCheck);
-        const formattedReply = markdown(reply);
+        const formattedReply = marked.parse(reply);
         await this.bridge.botClient.sendMessage(event.room_id, {
             /* eslint-disable @typescript-eslint/naming-convention */
             body: reply,
